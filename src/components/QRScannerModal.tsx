@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Camera, QrCode as QrIcon, Check, Copy, AlertCircle, Link2, Wifi, Sparkles } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
-import { Html5Qrcode } from 'html5-qrcode';
+import React, { useState } from 'react';
+import { X, Link2, Sparkles, Server, Check, ArrowRight, History } from 'lucide-react';
 import { triggerHaptic } from '../services/haptics';
 
 interface QRScannerModalProps {
@@ -21,166 +19,55 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   currentToken,
   hapticsEnabled
 }) => {
-  const [mode, setMode] = useState<'scan' | 'manual' | 'show'>('scan');
-  const [scanError, setScanError] = useState<string | null>(null);
-  const [manualUrl, setManualUrl] = useState('https://antigravity.google.com/r/');
-  const [copied, setCopied] = useState(false);
-  const scannerRef = useRef<Html5Qrcode | null>(null);
-  const readerId = 'qr-reader-target';
+  const [sessionUrl, setSessionUrl] = useState('https://antigravity.google.com/r/9536b9ab-7791-405c-ae37-34e58371f052-v2');
 
-  // Pair payload for QR generation
-  const pairPayload = JSON.stringify({
-    type: 'antigravity_pair',
-    url: currentHostUrl || `ws://${typeof window !== 'undefined' ? window.location.hostname : '192.168.0.201'}:4200`,
-    token: currentToken || 'agy_sec_token_99a8',
-    name: 'Antigravity Desktop Host'
-  });
-
-  const stopScanner = async () => {
-    if (scannerRef.current) {
-      try {
-        if (scannerRef.current.isScanning) {
-          await scannerRef.current.stop();
-        }
-        await scannerRef.current.clear();
-      } catch (e) {
-        console.warn('Error stopping scanner:', e);
-      }
-      scannerRef.current = null;
+  const recentSessions = [
+    {
+      name: 'Google Antigravity Session',
+      url: 'https://antigravity.google.com/r/9536b9ab-7791-405c-ae37-34e58371f052-v2',
+      type: 'remote'
+    },
+    {
+      name: 'Local Desktop Bridge',
+      url: 'ws://192.168.0.201:4200',
+      type: 'bridge'
     }
-  };
-
-  useEffect(() => {
-    if (!isOpen || mode !== 'scan') {
-      stopScanner();
-      return;
-    }
-
-    let isSubscribed = true;
-
-    const startScanner = async () => {
-      try {
-        setScanError(null);
-        await stopScanner();
-
-        const html5QrCode = new Html5Qrcode(readerId);
-        scannerRef.current = html5QrCode;
-
-        const config = {
-          fps: 15,
-          qrbox: { width: 220, height: 220 },
-          aspectRatio: 1.0
-        };
-
-        const onScanSuccess = (decodedText: string) => {
-          if (!isSubscribed) return;
-          triggerHaptic('success', hapticsEnabled);
-          try {
-            const parsed = JSON.parse(decodedText);
-            if (parsed.url) {
-              onScannedData(parsed.url, parsed.token);
-            } else {
-              onScannedData(decodedText);
-            }
-          } catch {
-            onScannedData(decodedText);
-          }
-          stopScanner();
-          onClose();
-        };
-
-        try {
-          await html5QrCode.start({ facingMode: 'environment' }, config, onScanSuccess, () => {});
-        } catch (envErr) {
-          console.warn('Environment camera failed, trying default camera:', envErr);
-          const cameras = await Html5Qrcode.getCameras();
-          if (cameras && cameras.length > 0) {
-            await html5QrCode.start(cameras[0].id, config, onScanSuccess, () => {});
-          } else {
-            throw new Error('No camera found on this device');
-          }
-        }
-      } catch (err: any) {
-        if (isSubscribed) {
-          console.warn('Camera scanner error:', err);
-          setScanError('Camera permission needed or camera unavailable. You can paste your Antigravity remote URL in Quick Pair.');
-        }
-      }
-    };
-
-    const timer = setTimeout(() => {
-      startScanner();
-    }, 250);
-
-    return () => {
-      isSubscribed = false;
-      clearTimeout(timer);
-      stopScanner();
-    };
-  }, [isOpen, mode]);
+  ];
 
   if (!isOpen) return null;
 
-  const handleCopyLink = () => {
-    triggerHaptic('light', hapticsEnabled);
-    navigator.clipboard.writeText(pairPayload);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleLaunch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sessionUrl.trim()) return;
+    triggerHaptic('medium', hapticsEnabled);
+    onScannedData(sessionUrl.trim());
+    onClose();
   };
 
-  const handleManualPair = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualUrl.trim()) return;
-    triggerHaptic('medium', hapticsEnabled);
-    onScannedData(manualUrl.trim());
-    stopScanner();
+  const handleSelectRecent = (url: string) => {
+    triggerHaptic('light', hapticsEnabled);
+    setSessionUrl(url);
+    onScannedData(url);
     onClose();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
       <div className="w-full max-w-sm bg-surface border border-surface-border rounded-3xl p-4 shadow-2xl space-y-4">
-        {/* Header & Tabs */}
+        {/* Header */}
         <div className="flex items-center justify-between border-b border-surface-border pb-3">
-          <div className="flex gap-1.5 bg-surface-card p-1 rounded-xl border border-surface-border">
-            <button
-              onClick={() => {
-                triggerHaptic('light', hapticsEnabled);
-                setMode('scan');
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                mode === 'scan' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Camera className="w-3.5 h-3.5" /> Scan QR
-            </button>
-            <button
-              onClick={() => {
-                triggerHaptic('light', hapticsEnabled);
-                setMode('manual');
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                mode === 'manual' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Link2 className="w-3.5 h-3.5" /> Paste URL
-            </button>
-            <button
-              onClick={() => {
-                triggerHaptic('light', hapticsEnabled);
-                setMode('show');
-              }}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
-                mode === 'show' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <QrIcon className="w-3.5 h-3.5" /> Show QR
-            </button>
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-xl bg-indigo-950/60 border border-indigo-500/30 text-sky-400">
+              <Sparkles className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-100">Antigravity Remote Session</h3>
+              <p className="text-[10px] text-gray-400">Connect to your active cloud or local workspace</p>
+            </div>
           </div>
           <button
             onClick={() => {
               triggerHaptic('light', hapticsEnabled);
-              stopScanner();
               onClose();
             }}
             className="p-1.5 rounded-full bg-surface-subtle text-gray-400 hover:text-white"
@@ -189,94 +76,53 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
           </button>
         </div>
 
-        {/* Scan Mode View */}
-        {mode === 'scan' && (
-          <div className="flex flex-col items-center justify-center space-y-3">
-            <div className="relative w-full max-w-[260px] h-[260px] rounded-2xl overflow-hidden bg-black/90 border-2 border-dashed border-indigo-500/50 flex items-center justify-center">
-              <div id={readerId} className="w-full h-full" />
-              {scanError && (
-                <div className="absolute inset-0 p-4 bg-surface/95 flex flex-col items-center justify-center text-center space-y-2">
-                  <AlertCircle className="w-8 h-8 text-amber-400" />
-                  <p className="text-xs text-gray-200">{scanError}</p>
-                  <button
-                    onClick={() => setMode('manual')}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow mt-1"
-                  >
-                    Paste Antigravity URL
-                  </button>
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-gray-400 text-center max-w-xs">
-              Scan the QR code shown in your Antigravity desktop IDE.
-            </p>
+        {/* Input Form */}
+        <form onSubmit={handleLaunch} className="space-y-3">
+          <div>
+            <label className="text-[11px] font-semibold text-gray-300 block mb-1">
+              Session Link or Bridge URL
+            </label>
+            <textarea
+              rows={3}
+              required
+              value={sessionUrl}
+              onChange={(e) => setSessionUrl(e.target.value)}
+              placeholder="https://antigravity.google.com/r/..."
+              className="w-full bg-surface-card border border-surface-border rounded-xl p-2.5 text-xs font-mono text-gray-100 focus:outline-none focus:border-brand-500 resize-none leading-relaxed"
+            />
           </div>
-        )}
 
-        {/* Manual Paste URL Mode */}
-        {mode === 'manual' && (
-          <form onSubmit={handleManualPair} className="space-y-3">
-            <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-sky-400 mb-1">
-                <Sparkles className="w-4 h-4" />
-                <span>Antigravity Remote URL</span>
-              </div>
-              <p className="text-[11px] text-gray-300">
-                Paste your <code className="text-sky-300">https://antigravity.google.com/r/...</code> link or desktop bridge URL.
-              </p>
-            </div>
+          <button
+            type="submit"
+            className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 text-white font-bold text-xs shadow-lg active:scale-98 flex items-center justify-center gap-2"
+          >
+            <Link2 className="w-4 h-4" /> Launch Remote Session 🚀
+          </button>
+        </form>
 
-            <div>
-              <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                Session Link or Bridge URL
-              </label>
-              <textarea
-                rows={2}
-                required
-                value={manualUrl}
-                onChange={(e) => setManualUrl(e.target.value)}
-                placeholder="https://antigravity.google.com/r/9536b9ab-..."
-                className="w-full bg-surface-card border border-surface-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 focus:outline-none focus:border-brand-500 resize-none"
-              />
-            </div>
-
+        {/* Recent / Quick Connect Presets */}
+        <div className="space-y-1.5 pt-1 border-t border-surface-border">
+          <div className="flex items-center gap-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
+            <History className="w-3 h-3" /> Quick Presets
+          </div>
+          {recentSessions.map((session, idx) => (
             <button
-              type="submit"
-              className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 text-white font-bold text-xs shadow-lg active:scale-98"
+              key={idx}
+              onClick={() => handleSelectRecent(session.url)}
+              className="w-full p-2 rounded-xl bg-surface-card hover:bg-surface-subtle border border-surface-border text-left flex items-center justify-between transition-colors active:scale-98"
             >
-              Launch Live Remote Control 🚀
-            </button>
-          </form>
-        )}
-
-        {/* Show QR Mode View */}
-        {mode === 'show' && (
-          <div className="flex flex-col items-center justify-center space-y-3">
-            <div className="p-4 bg-white rounded-2xl shadow-xl flex items-center justify-center">
-              <QRCodeSVG
-                value={pairPayload}
-                size={200}
-                bgColor="#ffffff"
-                fgColor="#090b10"
-                level="Q"
-              />
-            </div>
-            <div className="w-full bg-surface-card border border-surface-border rounded-xl p-2.5 flex items-center justify-between">
               <div className="truncate pr-2">
-                <span className="text-[10px] text-gray-400 block">Pairing URL</span>
-                <span className="font-mono text-xs text-sky-400 truncate block">
-                  {currentHostUrl || 'ws://192.168.0.201:4200'}
+                <span className="text-xs font-bold text-gray-200 block truncate">
+                  {session.name}
+                </span>
+                <span className="text-[10px] text-gray-400 font-mono truncate block">
+                  {session.url}
                 </span>
               </div>
-              <button
-                onClick={handleCopyLink}
-                className="flex-shrink-0 p-2 bg-surface-subtle border border-surface-border text-gray-300 rounded-lg active:scale-95"
-              >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-        )}
+              <ArrowRight className="w-3.5 h-3.5 text-sky-400 flex-shrink-0" />
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

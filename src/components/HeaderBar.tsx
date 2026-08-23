@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wifi, WifiOff, QrCode, Settings, Sparkles } from 'lucide-react';
+import { Wifi, WifiOff, Link2, Settings, Sparkles } from 'lucide-react';
 import { ConnectionStatus, HostProfile, ModelType } from '../types/antigravity';
 import { triggerHaptic } from '../services/haptics';
 
@@ -103,16 +103,16 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
             <span>{formatModelName(model)}</span>
           </button>
 
-          {/* QR Code Scanner */}
+          {/* Connect Session Quick Button */}
           <button
             onClick={() => {
               triggerHaptic('light', hapticsEnabled);
               onOpenQR();
             }}
-            aria-label="Scan QR Pair Code"
+            aria-label="Connect Remote Session"
             className="p-1.5 rounded-lg bg-surface-subtle border border-surface-border text-gray-300 hover:text-white active:scale-95 transition-all"
           >
-            <QrCode className="w-4 h-4 text-brand-accent" />
+            <Link2 className="w-4 h-4 text-brand-accent" />
           </button>
 
           {/* Settings Drawer */}

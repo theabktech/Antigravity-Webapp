@@ -1,23 +1,17 @@
 package com.antigravity.mobile;
 
-import android.Manifest;
 import android.app.Dialog;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Message;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
-import android.webkit.PermissionRequest;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
@@ -27,7 +21,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Fix status bar overlap: Set solid dark status bar background with white icons
+        // Status bar styling: Solid dark background with clean insets & light icons
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -38,14 +32,6 @@ public class MainActivity extends BridgeActivity {
         if (insetsController != null) {
             insetsController.setAppearanceLightStatusBars(false);
             insetsController.setAppearanceLightNavigationBars(false);
-        }
-
-        // Request camera and microphone permissions at runtime
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.RECORD_AUDIO
-            }, 101);
         }
     }
 
@@ -76,13 +62,6 @@ public class MainActivity extends BridgeActivity {
             settings.setUserAgentString(chromeUa);
 
             webView.setWebChromeClient(new WebChromeClient() {
-                @Override
-                public void onPermissionRequest(final PermissionRequest request) {
-                    runOnUiThread(() -> {
-                        request.grant(request.getResources());
-                    });
-                }
-
                 @Override
                 public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
                     WebView popupWebView = new WebView(MainActivity.this);

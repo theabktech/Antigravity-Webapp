@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Sparkles, ArrowLeft, RefreshCw, QrCode, ExternalLink } from 'lucide-react';
+import { Sparkles, ArrowLeft, RefreshCw, Link2, ExternalLink } from 'lucide-react';
 import { triggerHaptic } from '../services/haptics';
 
 interface LiveRemoteViewProps {
@@ -62,7 +62,7 @@ export const LiveRemoteView: React.FC<LiveRemoteViewProps> = ({
             }}
             className="flex-1 py-2 rounded-xl bg-surface-subtle border border-surface-border text-gray-300 text-xs font-semibold active:scale-95 flex items-center justify-center gap-1.5"
           >
-            <QrCode className="w-3.5 h-3.5 text-sky-400" /> Rescan QR
+            <Link2 className="w-3.5 h-3.5 text-sky-400" /> Switch Session
           </button>
           <button
             onClick={() => {
