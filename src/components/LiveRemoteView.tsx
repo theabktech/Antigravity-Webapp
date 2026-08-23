@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { RefreshCw, QrCode, ArrowLeft, ExternalLink, Shield, Wifi, Maximize2, Minimize2, Sparkles } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Sparkles, ArrowLeft, RefreshCw, QrCode, ExternalLink } from 'lucide-react';
 import { triggerHaptic } from '../services/haptics';
 
 interface LiveRemoteViewProps {
@@ -15,20 +15,18 @@ export const LiveRemoteView: React.FC<LiveRemoteViewProps> = ({
   onOpenScanner,
   hapticsEnabled
 }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
-
   useEffect(() => {
-    setIsLoading(true);
-  }, [remoteUrl, iframeKey]);
+    // Automatically navigate the top-level WebView directly so Google Account cookies & OAuth work without iframe 403
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.location.href = remoteUrl;
+      }
+    }, 400);
 
-  const handleRefresh = () => {
-    triggerHaptic('light', hapticsEnabled);
-    setIframeKey((prev) => prev + 1);
-  };
+    return () => clearTimeout(timer);
+  }, [remoteUrl]);
 
-  const handleDirectLaunch = () => {
+  const handleLaunchNow = () => {
     triggerHaptic('medium', hapticsEnabled);
     if (typeof window !== 'undefined') {
       window.location.href = remoteUrl;
@@ -36,115 +34,47 @@ export const LiveRemoteView: React.FC<LiveRemoteViewProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex flex-col bg-[#090b10] text-gray-100 overflow-hidden select-none">
-      {/* Floating Compact Control Bar */}
-      <div
-        className={`transition-all duration-300 z-50 ${
-          isMinimized
-            ? 'absolute top-3 right-3'
-            : 'sticky top-0 bg-surface/90 backdrop-blur-md border-b border-surface-border pt-[env(safe-area-inset-top,8px)] px-3 pb-2'
-        }`}
-      >
-        {isMinimized ? (
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090b10] text-gray-100 p-6 space-y-5 select-none">
+      <div className="w-16 h-16 rounded-3xl bg-gradient-to-tr from-indigo-600 to-sky-400 flex items-center justify-center shadow-[0_0_30px_rgba(99,102,241,0.6)] animate-pulse">
+        <Sparkles className="w-8 h-8 text-white" />
+      </div>
+
+      <div className="text-center space-y-2 max-w-xs">
+        <h3 className="text-base font-bold text-gray-100">Launching Antigravity Remote</h3>
+        <p className="text-xs text-gray-400 font-mono break-all bg-surface-card p-2.5 rounded-2xl border border-surface-border">
+          {remoteUrl}
+        </p>
+      </div>
+
+      <div className="w-full max-w-xs space-y-2.5 pt-2">
+        <button
+          onClick={handleLaunchNow}
+          className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 text-white font-bold text-xs shadow-lg active:scale-98 flex items-center justify-center gap-2"
+        >
+          <ExternalLink className="w-4 h-4" /> Open Fullscreen Session
+        </button>
+
+        <div className="flex gap-2">
           <button
             onClick={() => {
               triggerHaptic('light', hapticsEnabled);
-              setIsMinimized(false);
+              onOpenScanner();
             }}
-            className="w-10 h-10 rounded-full bg-indigo-600/90 border border-indigo-400/40 text-white flex items-center justify-center shadow-2xl backdrop-blur-md active:scale-95 animate-pulse"
+            className="flex-1 py-2 rounded-xl bg-surface-subtle border border-surface-border text-gray-300 text-xs font-semibold active:scale-95 flex items-center justify-center gap-1.5"
           >
-            <Sparkles className="w-5 h-5 text-sky-300" />
+            <QrCode className="w-3.5 h-3.5 text-sky-400" /> Rescan QR
           </button>
-        ) : (
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <button
-                onClick={() => {
-                  triggerHaptic('light', hapticsEnabled);
-                  onExit();
-                }}
-                className="p-1.5 rounded-xl bg-surface-subtle border border-surface-border text-gray-300 hover:text-white active:scale-95"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <div className="flex flex-col truncate">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                  <span className="text-xs font-bold text-gray-100 truncate">
-                    Antigravity Remote Live
-                  </span>
-                </div>
-                <span className="text-[10px] text-sky-400/80 font-mono truncate max-w-[180px]">
-                  {remoteUrl}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <button
-                onClick={handleRefresh}
-                className="p-1.5 rounded-lg bg-surface-subtle border border-surface-border text-gray-300 hover:text-white active:scale-95"
-                title="Reload Session"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-sky-400' : ''}`} />
-              </button>
-
-              <button
-                onClick={() => {
-                  triggerHaptic('light', hapticsEnabled);
-                  onOpenScanner();
-                }}
-                className="p-1.5 rounded-lg bg-surface-subtle border border-surface-border text-sky-400 hover:text-white active:scale-95"
-                title="Scan Different QR Code"
-              >
-                <QrCode className="w-3.5 h-3.5" />
-              </button>
-
-              <button
-                onClick={() => {
-                  triggerHaptic('light', hapticsEnabled);
-                  setIsMinimized(true);
-                }}
-                className="p-1.5 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 hover:text-white active:scale-95"
-                title="Fullscreen App View"
-              >
-                <Maximize2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-[#090b10] flex flex-col items-center justify-center z-30 space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center shadow-2xl">
-            <RefreshCw className="w-6 h-6 text-sky-400 animate-spin" />
-          </div>
-          <div className="text-center">
-            <h4 className="text-sm font-bold text-gray-100">Connecting to Antigravity Remote</h4>
-            <p className="text-xs text-gray-400 mt-1 max-w-xs">
-              Establishing secure session with your desktop IDE...
-            </p>
-          </div>
           <button
-            onClick={handleDirectLaunch}
-            className="text-xs text-sky-400 underline pt-2"
+            onClick={() => {
+              triggerHaptic('light', hapticsEnabled);
+              onExit();
+            }}
+            className="flex-1 py-2 rounded-xl bg-surface-subtle border border-surface-border text-gray-300 text-xs font-semibold active:scale-95 flex items-center justify-center gap-1.5"
           >
-            Having trouble? Tap to open directly
+            <ArrowLeft className="w-3.5 h-3.5" /> Back
           </button>
         </div>
-      )}
-
-      {/* Embedded Fullscreen Webview Container */}
-      <iframe
-        key={iframeKey}
-        src={remoteUrl}
-        onLoad={() => setIsLoading(false)}
-        className="w-full flex-1 border-none bg-[#090b10]"
-        allow="camera *; microphone *; clipboard-read *; clipboard-write *; autoplay *; display-capture *"
-        sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-top-navigation-by-user-activation"
-      />
+      </div>
     </div>
   );
 };
