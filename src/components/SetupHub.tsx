@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Link2, Monitor, ArrowRight, Laptop, ShieldCheck, Check, History, Trash2, HelpCircle } from 'lucide-react';
+import { Sparkles, Link2, ArrowRight, Laptop, Trash2, Clipboard } from 'lucide-react';
 import { triggerHaptic } from '../services/haptics';
 
 interface SetupHubProps {
@@ -15,21 +15,8 @@ export const SetupHub: React.FC<SetupHubProps> = ({
   onClearSaved,
   hapticsEnabled
 }) => {
-  const [inputUrl, setInputUrl] = useState(savedUrl || 'https://antigravity.google.com/r/');
+  const [inputUrl, setInputUrl] = useState(savedUrl || '');
   const [showWalkthrough, setShowWalkthrough] = useState(true);
-
-  const presets = [
-    {
-      name: 'Google Antigravity Session',
-      url: 'https://antigravity.google.com/r/9536b9ab-7791-405c-ae37-34e58371f052-v2',
-      desc: 'Active Cloud IDE Remote Lease'
-    },
-    {
-      name: 'Local Wi-Fi Bridge',
-      url: 'ws://192.168.0.201:4200',
-      desc: 'Direct Desktop WebSocket Bridge'
-    }
-  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,7 +29,7 @@ export const SetupHub: React.FC<SetupHubProps> = ({
     try {
       if (navigator.clipboard) {
         const text = await navigator.clipboard.readText();
-        if (text && (text.includes('antigravity.google.com') || text.includes('http') || text.includes('ws'))) {
+        if (text) {
           setInputUrl(text.trim());
           triggerHaptic('light', hapticsEnabled);
         }
@@ -64,7 +51,7 @@ export const SetupHub: React.FC<SetupHubProps> = ({
             Antigravity Mobile
           </h1>
           <p className="text-xs text-sky-400/90 font-medium">
-            Official Remote Companion App
+            Remote Workspace Companion
           </p>
         </div>
       </div>
@@ -79,9 +66,9 @@ export const SetupHub: React.FC<SetupHubProps> = ({
           <button
             type="button"
             onClick={handlePasteClipboard}
-            className="text-[11px] text-sky-400 hover:text-sky-300 font-semibold bg-indigo-950/50 px-2 py-1 rounded-lg border border-indigo-500/30 active:scale-95"
+            className="text-[11px] text-sky-400 hover:text-sky-300 font-semibold bg-indigo-950/50 px-2 py-1 rounded-lg border border-indigo-500/30 active:scale-95 flex items-center gap-1"
           >
-            Paste from Clipboard
+            <Clipboard className="w-3 h-3" /> Paste Link
           </button>
         </div>
 
@@ -91,7 +78,7 @@ export const SetupHub: React.FC<SetupHubProps> = ({
             required
             value={inputUrl}
             onChange={(e) => setInputUrl(e.target.value)}
-            placeholder="https://antigravity.google.com/r/..."
+            placeholder="Paste your link (e.g. https://antigravity.google.com/r/...)"
             className="w-full bg-surface-card border border-surface-border rounded-2xl p-3 text-xs font-mono text-gray-100 placeholder:text-gray-600 focus:outline-none focus:border-brand-500 resize-none leading-relaxed"
           />
         </div>
@@ -100,7 +87,7 @@ export const SetupHub: React.FC<SetupHubProps> = ({
           type="submit"
           className="w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 text-white font-bold text-xs shadow-lg active:scale-98 flex items-center justify-center gap-2"
         >
-          <Sparkles className="w-4 h-4" /> Connect & Remember Instance 🚀
+          <Sparkles className="w-4 h-4" /> Connect & Remember Workspace 🚀
         </button>
 
         {savedUrl && (
@@ -111,7 +98,7 @@ export const SetupHub: React.FC<SetupHubProps> = ({
               onClick={onClearSaved}
               className="text-rose-400 hover:text-rose-300 flex items-center gap-1 active:scale-95"
             >
-              <Trash2 className="w-3 h-3" /> Clear
+              <Trash2 className="w-3 h-3" /> Clear Saved
             </button>
           </div>
         )}
@@ -140,7 +127,7 @@ export const SetupHub: React.FC<SetupHubProps> = ({
               </span>
               <div>
                 <strong className="text-white">Open Antigravity on your PC</strong>
-                <p className="text-[11px] text-gray-400">Launch Google Antigravity desktop IDE.</p>
+                <p className="text-[11px] text-gray-400">Launch your Google Antigravity desktop IDE.</p>
               </div>
             </div>
 
@@ -175,7 +162,7 @@ export const SetupHub: React.FC<SetupHubProps> = ({
               <div>
                 <strong className="text-white">Paste & Connect on Phone</strong>
                 <p className="text-[11px] text-gray-400">
-                  Paste the link above. The app will log in and keep you connected!
+                  Paste the link above and tap Connect. You can sign in with your Google account to access your workspace.
                 </p>
               </div>
             </div>
@@ -183,28 +170,29 @@ export const SetupHub: React.FC<SetupHubProps> = ({
         )}
       </div>
 
-      {/* Quick Presets */}
+      {/* Local Bridge Option */}
       <div className="space-y-2">
         <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-1">
-          Recent Presets
+          Direct Wi-Fi Bridge
         </span>
-        {presets.map((p, idx) => (
-          <button
-            key={idx}
-            onClick={() => {
-              triggerHaptic('light', hapticsEnabled);
-              setInputUrl(p.url);
-              onConnect(p.url);
-            }}
-            className="w-full p-3 rounded-2xl bg-surface-card hover:bg-surface-subtle border border-surface-border text-left flex items-center justify-between transition-colors active:scale-98"
-          >
-            <div className="truncate pr-2">
-              <span className="text-xs font-bold text-gray-200 block truncate">{p.name}</span>
-              <span className="text-[10px] text-gray-400 font-mono truncate block">{p.url}</span>
-            </div>
-            <ArrowRight className="w-4 h-4 text-sky-400 flex-shrink-0" />
-          </button>
-        ))}
+        <button
+          onClick={() => {
+            triggerHaptic('light', hapticsEnabled);
+            setInputUrl('ws://192.168.0.201:4200');
+            onConnect('ws://192.168.0.201:4200');
+          }}
+          className="w-full p-3 rounded-2xl bg-surface-card hover:bg-surface-subtle border border-surface-border text-left flex items-center justify-between transition-colors active:scale-98"
+        >
+          <div className="truncate pr-2">
+            <span className="text-xs font-bold text-gray-200 block truncate">
+              Local Desktop Bridge
+            </span>
+            <span className="text-[10px] text-gray-400 font-mono truncate block">
+              ws://192.168.0.201:4200
+            </span>
+          </div>
+          <ArrowRight className="w-4 h-4 text-sky-400 flex-shrink-0" />
+        </button>
       </div>
     </div>
   );
