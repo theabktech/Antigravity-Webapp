@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Share, PlusSquare, X, CheckCircle, Smartphone } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { triggerHaptic } from '../services/haptics';
 
 interface PWAInstallPromptProps {
@@ -19,8 +20,13 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
+  // Check if running inside native APK
+  const isNative = typeof window !== 'undefined' && Capacitor.isNativePlatform();
+
   useEffect(() => {
-    // Check if running standalone (already installed)
+    if (isNative) return;
+
+    // Check if running standalone (already installed as PWA)
     const checkStandalone =
       window.matchMedia('(display-mode: standalone)').matches ||
       (window.navigator as any).standalone === true;
@@ -42,7 +48,12 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
-  }, []);
+  }, [isNative]);
+
+  // If in native Android APK, never render any install banner or prompts
+  if (isNative) {
+    return null;
+  }
 
   const handleInstallClick = async () => {
     triggerHaptic('medium', hapticsEnabled);
@@ -74,7 +85,7 @@ export const PWAInstallPrompt: React.FC<PWAInstallPromptProps> = ({
 
   return (
     <>
-      {/* Floating Bottom Install Pill (if not installed & not dismissed) */}
+      {/* Floating Bottom Install Pill (if in web browser & not dismissed) */}
       {!isStandalone && !bannerDismissed && isOpen === undefined && (
         <div className="fixed bottom-16 left-3 right-3 z-30 animate-bounce">
           <div className="bg-gradient-to-r from-indigo-900/90 via-surface-card to-surface-subtle border border-indigo-500/40 rounded-2xl p-3 shadow-2xl flex items-center justify-between backdrop-blur-md">

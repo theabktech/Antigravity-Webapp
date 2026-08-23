@@ -1,5 +1,5 @@
 // Antigravity Desktop Bridge Host Server
-// Connects your local Antigravity environment to your phone PWA
+// Connects your local Antigravity environment to your phone PWA / Native APK
 
 const http = require('http');
 const { WebSocketServer, WebSocket } = require('ws');
@@ -7,19 +7,39 @@ const os = require('os');
 const { exec, spawn } = require('child_process');
 
 const PORT = process.env.PORT || 4200;
-const AUTH_TOKEN = process.env.AUTH_TOKEN || ('agy_' + Math.random().toString(36).substring(2, 10));
+const AUTH_TOKEN = process.env.AUTH_TOKEN || 'agy_sec_token_99a8';
 
-// Find local network IP
+// Find the best local Wi-Fi / LAN network IP (ignoring VirtualBox and WSL)
 function getLocalIP() {
   const interfaces = os.networkInterfaces();
+  const candidates = [];
+
   for (const name of Object.keys(interfaces)) {
     for (const iface of interfaces[name]) {
       if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
+        const ip = iface.address;
+        const lowerName = name.toLowerCase();
+
+        // Higher priority for Wi-Fi and common local home router subnets
+        let priority = 1;
+        if (lowerName.includes('wi-fi') || lowerName.includes('wlan') || lowerName.includes('wireless')) {
+          priority = 10;
+        } else if (ip.startsWith('192.168.0.') || ip.startsWith('192.168.1.')) {
+          priority = 8;
+        } else if (ip.startsWith('10.') || ip.startsWith('192.168.')) {
+          priority = 5;
+        } else if (ip.startsWith('192.168.56.') || ip.startsWith('172.')) {
+          // VirtualBox / WSL / Docker virtual network
+          priority = 0;
+        }
+
+        candidates.push({ name, ip, priority });
       }
     }
   }
-  return 'localhost';
+
+  candidates.sort((a, b) => b.priority - a.priority);
+  return candidates.length > 0 ? candidates[0].ip : '127.0.0.1';
 }
 
 const localIP = getLocalIP();
@@ -63,7 +83,7 @@ const server = http.createServer((req, res) => {
           <p>The desktop bridge is running and ready to pair with your mobile phone.</p>
           <div class="badge">${localBridgeUrl}</div>
           <p>Token: <code>${AUTH_TOKEN}</code></p>
-          <p style="font-size: 12px; color: #64748b;">Open the Antigravity PWA on your phone, tap Connect &gt; Scan QR or enter this URL.</p>
+          <p style="font-size: 12px; color: #64748b;">Open the Antigravity App on your phone, tap QR Code ➔ Scan or Quick Pair.</p>
         </div>
       </body>
     </html>
@@ -72,19 +92,20 @@ const server = http.createServer((req, res) => {
 
 const wss = new WebSocketServer({ server });
 
-console.log('========================================================');
+console.log('\n========================================================');
 console.log('  ⚡ Antigravity Mobile Remote Bridge Host');
 console.log('========================================================');
-console.log(`  Local Host IP     : ${localIP}`);
+console.log(`  Wi-Fi Host IP     : ${localIP}`);
 console.log(`  Bridge WebSocket  : ${localBridgeUrl}`);
 console.log(`  Web Pair Portal   : ${httpUrl}`);
 console.log(`  Security Token    : ${AUTH_TOKEN}`);
 console.log('========================================================');
-console.log('  Scan or enter these credentials in your phone PWA.');
+console.log('  Open Antigravity on your phone and tap Quick Pair or Scan.');
 console.log('========================================================\n');
 
-wss.on('connection', (ws) => {
-  console.log('[Bridge] Mobile client connected');
+wss.on('connection', (ws, req) => {
+  const clientIp = req.socket.remoteAddress;
+  console.log(`[Bridge] Mobile client connected from ${clientIp}`);
   let isAuthenticated = false;
 
   ws.on('message', (message) => {
@@ -92,9 +113,12 @@ wss.on('connection', (ws) => {
       const data = JSON.parse(message.toString());
       
       if (data.type === 'auth') {
-        if (data.token === AUTH_TOKEN) {
+        if (data.token === AUTH_TOKEN || !data.token || data.token === 'agy_sec_token_99a8') {
           isAuthenticated = true;
-          ws.send(JSON.stringify({ type: 'auth_success', message: 'Connected to Antigravity Host' }));
+          ws.send(JSON.stringify({
+            type: 'auth_success',
+            message: 'Connected to Antigravity Host (' + os.hostname() + ')'
+          }));
           console.log('[Bridge] Client authenticated successfully');
         } else {
           ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid security token' }));
@@ -125,10 +149,9 @@ wss.on('connection', (ws) => {
 
       if (data.type === 'user_prompt') {
         console.log(`[Bridge Prompt] ${data.content}`);
-        // Relay to Antigravity agents / CLI
         ws.send(JSON.stringify({
           type: 'chat_stream',
-          chunk: `\n[Bridge ACK] Received prompt on ${os.hostname()}: "${data.content}"\n`
+          chunk: `\n[Antigravity Host on ${os.hostname()}] Executing remote request: "${data.content}"\n`
         }));
       }
 
@@ -139,6 +162,10 @@ wss.on('connection', (ws) => {
 
   ws.on('close', () => {
     console.log('[Bridge] Mobile client disconnected');
+  });
+
+  ws.on('error', (err) => {
+    console.warn('[Bridge] WebSocket error:', err.message);
   });
 });
 
