@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Message;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.CookieManager;
@@ -74,23 +73,7 @@ public class MainActivity extends BridgeActivity {
             String chromeUa = "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36";
             settings.setUserAgentString(chromeUa);
 
-            webView.setWebViewClient(new WebViewClient() {
-                @Override
-                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                    String url = request.getUrl().toString();
-                    // Intercept Google login to force full on-device Account Chooser picker
-                    if ((url.contains("accounts.google.com/signin") || url.contains("accounts.google.com/ServiceLogin"))
-                            && !url.contains("prompt=select_account")
-                            && !url.contains("prompt=consent")) {
-                        String separator = url.contains("?") ? "&" : "?";
-                        String modifiedUrl = url + separator + "prompt=select_account";
-                        view.loadUrl(modifiedUrl);
-                        return true;
-                    }
-                    return false;
-                }
-            });
-
+            // WebChromeClient handles popups (e.g. Google Sign-In popups) without breaking Capacitor's main bridge client
             webView.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
