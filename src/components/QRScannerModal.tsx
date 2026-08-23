@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Camera, QrCode as QrIcon, Check, Copy, AlertCircle, RefreshCw, Link2, Wifi } from 'lucide-react';
+import { X, Camera, QrCode as QrIcon, Check, Copy, AlertCircle, Link2, Wifi, Sparkles } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { triggerHaptic } from '../services/haptics';
@@ -21,12 +21,10 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   currentToken,
   hapticsEnabled
 }) => {
-  const [mode, setMode] = useState<'scan' | 'show' | 'manual'>('scan');
+  const [mode, setMode] = useState<'scan' | 'manual' | 'show'>('scan');
   const [scanError, setScanError] = useState<string | null>(null);
-  const [manualUrl, setManualUrl] = useState('ws://192.168.0.201:4200');
-  const [manualToken, setManualToken] = useState('agy_sec_token_99a8');
+  const [manualUrl, setManualUrl] = useState('https://antigravity.google.com/r/');
   const [copied, setCopied] = useState(false);
-  const [isScanningActive, setIsScanningActive] = useState(false);
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const readerId = 'qr-reader-target';
 
@@ -49,7 +47,6 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
         console.warn('Error stopping scanner:', e);
       }
       scannerRef.current = null;
-      setIsScanningActive(false);
     }
   };
 
@@ -69,7 +66,6 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
         const html5QrCode = new Html5Qrcode(readerId);
         scannerRef.current = html5QrCode;
 
-        // Try environment camera first, then fallback to any camera
         const config = {
           fps: 15,
           qrbox: { width: 220, height: 220 },
@@ -95,13 +91,11 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
 
         try {
           await html5QrCode.start({ facingMode: 'environment' }, config, onScanSuccess, () => {});
-          if (isSubscribed) setIsScanningActive(true);
         } catch (envErr) {
           console.warn('Environment camera failed, trying default camera:', envErr);
           const cameras = await Html5Qrcode.getCameras();
           if (cameras && cameras.length > 0) {
             await html5QrCode.start(cameras[0].id, config, onScanSuccess, () => {});
-            if (isSubscribed) setIsScanningActive(true);
           } else {
             throw new Error('No camera found on this device');
           }
@@ -109,7 +103,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
       } catch (err: any) {
         if (isSubscribed) {
           console.warn('Camera scanner error:', err);
-          setScanError('Camera permission required. You can grant camera permission in Android settings, or use Instant Wi-Fi Pair below.');
+          setScanError('Camera permission needed or camera unavailable. You can paste your Antigravity remote URL in Quick Pair.');
         }
       }
     };
@@ -138,7 +132,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
     e.preventDefault();
     if (!manualUrl.trim()) return;
     triggerHaptic('medium', hapticsEnabled);
-    onScannedData(manualUrl.trim(), manualToken.trim() || undefined);
+    onScannedData(manualUrl.trim());
     stopScanner();
     onClose();
   };
@@ -158,7 +152,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
                 mode === 'scan' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
               }`}
             >
-              <Camera className="w-3.5 h-3.5" /> Scan
+              <Camera className="w-3.5 h-3.5" /> Scan QR
             </button>
             <button
               onClick={() => {
@@ -169,7 +163,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
                 mode === 'manual' ? 'bg-indigo-600 text-white shadow' : 'text-gray-400 hover:text-white'
               }`}
             >
-              <Link2 className="w-3.5 h-3.5" /> Quick Pair
+              <Link2 className="w-3.5 h-3.5" /> Paste URL
             </button>
             <button
               onClick={() => {
@@ -208,64 +202,49 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
                     onClick={() => setMode('manual')}
                     className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow mt-1"
                   >
-                    Use Quick Pair Instead
+                    Paste Antigravity URL
                   </button>
                 </div>
               )}
             </div>
             <p className="text-xs text-gray-400 text-center max-w-xs">
-              Point phone camera at the QR code on your PC screen.
+              Scan the QR code shown in your Antigravity desktop IDE.
             </p>
           </div>
         )}
 
-        {/* Manual Quick Pair Mode */}
+        {/* Manual Paste URL Mode */}
         {mode === 'manual' && (
           <form onSubmit={handleManualPair} className="space-y-3">
             <div className="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-3">
               <div className="flex items-center gap-2 text-xs font-bold text-sky-400 mb-1">
-                <Wifi className="w-4 h-4" />
-                <span>Instant Desktop Wi-Fi Pair</span>
+                <Sparkles className="w-4 h-4" />
+                <span>Antigravity Remote URL</span>
               </div>
               <p className="text-[11px] text-gray-300">
-                Connect directly to your desktop bridge server running on port 4200.
+                Paste your <code className="text-sky-300">https://antigravity.google.com/r/...</code> link or desktop bridge URL.
               </p>
             </div>
 
-            <div className="space-y-2">
-              <div>
-                <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                  Host WebSocket URL
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={manualUrl}
-                  onChange={(e) => setManualUrl(e.target.value)}
-                  placeholder="ws://192.168.0.201:4200"
-                  className="w-full bg-surface-card border border-surface-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 focus:outline-none focus:border-brand-500"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-gray-300 block mb-1">
-                  Security Token
-                </label>
-                <input
-                  type="text"
-                  value={manualToken}
-                  onChange={(e) => setManualToken(e.target.value)}
-                  placeholder="agy_sec_token_99a8"
-                  className="w-full bg-surface-card border border-surface-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 focus:outline-none focus:border-brand-500"
-                />
-              </div>
+            <div>
+              <label className="text-[11px] font-semibold text-gray-300 block mb-1">
+                Session Link or Bridge URL
+              </label>
+              <textarea
+                rows={2}
+                required
+                value={manualUrl}
+                onChange={(e) => setManualUrl(e.target.value)}
+                placeholder="https://antigravity.google.com/r/9536b9ab-..."
+                className="w-full bg-surface-card border border-surface-border rounded-xl px-3 py-2 text-xs font-mono text-gray-100 focus:outline-none focus:border-brand-500 resize-none"
+              />
             </div>
 
             <button
               type="submit"
               className="w-full py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-500 text-white font-bold text-xs shadow-lg active:scale-98"
             >
-              Connect & Pair Now
+              Launch Live Remote Control 🚀
             </button>
           </form>
         )}

@@ -10,6 +10,7 @@ import { ConnectionModal } from './components/ConnectionModal';
 import { QRScannerModal } from './components/QRScannerModal';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { SettingsDrawer } from './components/SettingsDrawer';
+import { LiveRemoteView } from './components/LiveRemoteView';
 import { bridgeClient } from './services/bridgeClient';
 import {
   ConnectionStatus,
@@ -32,6 +33,16 @@ export const App: React.FC = () => {
     id: 'local-sim',
     name: 'Mobile Simulator',
     url: 'sim://localhost'
+  });
+
+  // Antigravity Live Web Remote Session URL (e.g. https://antigravity.google.com/r/...)
+  const [liveRemoteUrl, setLiveRemoteUrl] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return localStorage.getItem('agy_live_remote_url');
+      } catch (e) {}
+    }
+    return null;
   });
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -68,7 +79,7 @@ export const App: React.FC = () => {
     };
   });
 
-  // URL query parameter shortcuts (e.g. from PWA App Shortcuts)
+  // URL query parameter shortcuts
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -127,6 +138,16 @@ export const App: React.FC = () => {
   };
 
   const handleScannedPairData = (url: string, token?: string) => {
+    // If it is a Google Antigravity Remote URL or web URL
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      setLiveRemoteUrl(url);
+      try {
+        localStorage.setItem('agy_live_remote_url', url);
+      } catch (e) {}
+      return;
+    }
+
+    // Otherwise connect to WebSocket Bridge
     const newProfile = bridgeClient.addProfile({
       name: 'Scanned Host',
       url,
@@ -135,6 +156,27 @@ export const App: React.FC = () => {
     });
     bridgeClient.connectToProfile(newProfile.id);
   };
+
+  // If active Google Antigravity Remote session is loaded
+  if (liveRemoteUrl) {
+    return (
+      <>
+        <LiveRemoteView
+          remoteUrl={liveRemoteUrl}
+          onExit={() => setLiveRemoteUrl(null)}
+          onOpenScanner={() => setIsQRModalOpen(true)}
+          hapticsEnabled={settings.hapticsEnabled}
+        />
+        <QRScannerModal
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+          onScannedData={handleScannedPairData}
+          currentHostUrl={liveRemoteUrl}
+          hapticsEnabled={settings.hapticsEnabled}
+        />
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full w-full bg-background select-none text-gray-100 overflow-hidden">
