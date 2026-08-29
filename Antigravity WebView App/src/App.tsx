@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { SetupHub } from './components/SetupHub';
-import { admobService } from './services/admobService';
 
 export const App: React.FC = () => {
   // Check if we have an active saved session URL
@@ -13,14 +12,7 @@ export const App: React.FC = () => {
     return null;
   });
 
-  // Always keep persistent bottom banner active across the entire app
   useEffect(() => {
-    // Show App Startup Ad on initial boot
-    admobService.showAppStartupAd(true);
-
-    // Keep persistent banner running everywhere (Setup Hub & inside Workspace)
-    admobService.showPersistentBanner();
-
     if (savedRemoteUrl && typeof window !== 'undefined') {
       window.location.replace(savedRemoteUrl);
     }
@@ -36,14 +28,11 @@ export const App: React.FC = () => {
     }
   };
 
-  const handleClearSaved = async () => {
+  const handleClearSaved = () => {
     try {
       localStorage.removeItem('agy_live_remote_url');
     } catch (e) {}
-    // Show interstitial transition ad when clearing/switching sessions
-    await admobService.showInterstitial();
     setSavedRemoteUrl(null);
-    admobService.showPersistentBanner();
   };
 
   // If saved URL is redirecting, render a clean dark background

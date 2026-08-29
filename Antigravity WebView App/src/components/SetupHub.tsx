@@ -59,19 +59,11 @@ export const SetupHub: React.FC<SetupHubProps> = ({
             </div>
           </div>
 
-          {/* Remove Ads / Pro Badge */}
-          <button
-            type="button"
-            onClick={() => {
-              const current = localStorage.getItem('agy_ads_disabled') === 'true';
-              localStorage.setItem('agy_ads_disabled', current ? 'false' : 'true');
-              window.location.reload();
-            }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-300 text-[11px] font-bold active:scale-95 shadow-sm"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-            <span>{typeof window !== 'undefined' && localStorage.getItem('agy_ads_disabled') === 'true' ? 'Ads Off' : 'Go Ad-Free'}</span>
-          </button>
+          {/* Status Badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-indigo-950/60 border border-indigo-500/30 text-indigo-300 text-[11px] font-bold shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>v1.0 Ready</span>
+          </div>
         </div>
 
         {/* Connection Card */}
