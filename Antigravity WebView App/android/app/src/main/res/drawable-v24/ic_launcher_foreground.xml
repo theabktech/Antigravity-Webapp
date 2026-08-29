@@ -1,0 +1,94 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Antigravity Ambient Orbital Halo -->
+    <path
+        android:pathData="M54,20 C72.78,20 88,35.22 88,54 C88,72.78 72.78,88 54,88 C35.22,88 20,72.78 20,54 C20,35.22 35.22,20 54,20 Z"
+        android:strokeWidth="1.5">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="20"
+                android:startY="20"
+                android:endX="88"
+                android:endY="88"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#2038BDF8"/>
+                <item android:offset="0.5" android:color="#406366F1"/>
+                <item android:offset="1.0" android:color="#10A855F7"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Antigravity Inner Hex Prism Glow -->
+    <path
+        android:pathData="M54,26 L78,40 L78,68 L54,82 L30,68 L30,40 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="30"
+                android:startY="26"
+                android:endX="78"
+                android:endY="82"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#1538BDF8"/>
+                <item android:offset="1.0" android:color="#106366F1"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Antigravity Geometric 'A' Apex (Left Wing) -->
+    <path
+        android:pathData="M54,30 L32,74 L42,74 L54,49 L54,30 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="32"
+                android:startY="74"
+                android:endX="54"
+                android:endY="30"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#38BDF8"/>
+                <item android:offset="1.0" android:color="#60A5FA"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Antigravity Geometric 'A' Apex (Right Wing) -->
+    <path
+        android:pathData="M54,30 L76,74 L66,74 L54,49 L54,30 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="54"
+                android:startY="30"
+                android:endX="76"
+                android:endY="74"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#818CF8"/>
+                <item android:offset="1.0" android:color="#6366F1"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Antigravity Floating Core Bridge -->
+    <path
+        android:pathData="M40,61 L68,61 L64,53 L44,53 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="40"
+                android:startY="57"
+                android:endX="68"
+                android:endY="57"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#38BDF8"/>
+                <item android:offset="1.0" android:color="#C084FC"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Antigravity Glowing Vertex Sparkle -->
+    <path
+        android:pathData="M54,28 L56,33 L61,35 L56,37 L54,42 L52,37 L47,35 L52,33 Z"
+        android:fillColor="#FFFFFF"/>
+</vector>

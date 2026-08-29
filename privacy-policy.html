@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - Antigravity Mobile</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #090b10;
+            --surface: #11141d;
+            --border: #1e2433;
+            --brand-from: #6366f1;
+            --brand-to: #38bdf8;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --accent: #38bdf8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.7;
+            color: var(--text-main);
+            background-color: var(--bg);
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 820px;
+            width: 100%;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 40px rgba(99, 102, 241, 0.08);
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #818cf8;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .date {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section {
+            margin-top: 32px;
+            border-top: 1px solid var(--border);
+            padding-top: 24px;
+        }
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        p, li {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+        ul {
+            padding-left: 24px;
+            margin-bottom: 16px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        a:hover {
+            color: #7dd3fc;
+            text-decoration: underline;
+        }
+        .highlight-box {
+            background: rgba(56, 189, 248, 0.05);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            font-size: 13px;
+            color: #6b7280;
+        }
+        @media (max-width: 640px) {
+            .container { padding: 28px 20px; border-radius: 16px; }
+            h1 { font-size: 26px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="badge">Official Compliance Document</div>
+        <h1>Privacy Policy for Antigravity Mobile</h1>
+        <div class="date">Effective Date: August 29, 2026</div>
+
+        <p>This Privacy Policy explains how <strong>Antigravity Mobile</strong> ("we", "our", or "the Application") collects, uses, and protects information when you use our mobile application and related services.</p>
+
+        <div class="section">
+            <h2>1. Information We Collect</h2>
+            <p>We believe in data minimization. We do not require you to create an account with us to use the app, and we do not store your private code or remote workspace credentials on our servers.</p>
+            
+            <div class="highlight-box">
+                <p><strong>Local Device Data:</strong> Your remote workspace URLs, connection tokens, and display preferences are stored exclusively on your device using encrypted local storage. They are never transmitted to our servers.</p>
+            </div>
+
+            <p>However, the Application integrates third-party SDKs to provide essential platform capabilities and monetization:</p>
+            <ul>
+                <li><strong>Google Play Services:</strong> Core platform libraries and security integrity services.</li>
+                <li><strong>Google AdMob:</strong> Advertisements shown within the app. AdMob may collect and process device identifiers, including the Google Advertising ID (AAID), IP address, coarse location, and app interaction data to serve personalized or contextual advertisements and measure ad performance.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>2. Device Permissions Required</h2>
+            <p>The Application requests the following standard Android permissions strictly to fulfill its features:</p>
+            <ul>
+                <li><strong>INTERNET &amp; ACCESS_NETWORK_STATE:</strong> Required to connect to your remote workspace environment and load live session content.</li>
+                <li><strong>POST_NOTIFICATIONS:</strong> On Android 13 (API 33) and newer, used to deliver background task notifications, terminal alerts, and tool approval requests.</li>
+                <li><strong>VIBRATE:</strong> Used for tactile haptic feedback and high-priority alerts.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>3. Third-Party Services &amp; Privacy Policies</h2>
+            <p>Our advertising and service partners operate under their respective privacy policies:</p>
+            <ul>
+                <li><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy &amp; Terms</a></li>
+                <li><a href="https://support.google.com/admob/answer/6128543" target="_blank" rel="noopener">Google AdMob Data Safety &amp; Policy Guidelines</a></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>4. User Rights &amp; Opt-Outs</h2>
+            <p>You have full control over advertising and tracking identifiers:</p>
+            <ul>
+                <li><strong>Reset or Delete Advertising ID:</strong> You can reset or delete your Android Advertising ID at any time via <em>Settings &gt; Google &gt; Ads &gt; Reset/Delete advertising ID</em>.</li>
+                <li><strong>Ad-Free Mode:</strong> You can toggle ads off directly within the app settings.</li>
+                <li><strong>Data Deletion:</strong> Clearing application storage via Android Settings will permanently purge all cached sessions, URLs, and local settings.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>5. Data Security &amp; Encryption</h2>
+            <p>All network communications between the Application, Google Antigravity servers, and third-party APIs are encrypted in transit using industry-standard Transport Layer Security (TLS/HTTPS). Cleartext HTTP traffic is blocked by default.</p>
+        </div>
+
+        <div class="section">
+            <h2>6. Children's Privacy</h2>
+            <p>The Application is intended for developers, technical professionals, and general audiences aged 13 and above. We do not knowingly collect personal identifiable information from children under 13.</p>
+        </div>
+
+        <div class="section">
+            <h2>7. Contact Information</h2>
+            <p>If you have any questions, suggestions, or concerns regarding this Privacy Policy or your data, please contact us:</p>
+            <p><strong>Email:</strong> <a href="mailto:support@theabktech.com">support@theabktech.com</a></p>
+            <p><strong>Website:</strong> <a href="https://github.com/theabktech/Antigravity-Webapp" target="_blank" rel="noopener">https://github.com/theabktech/Antigravity-Webapp</a></p>
+        </div>
+
+        <div class="footer">
+            &copy; 2026 Antigravity Mobile. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

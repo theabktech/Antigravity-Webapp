@@ -29,3 +29,17 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Android build outputs & Keystores
+*.jks
+*.keystore
+keystore.properties
+.gradle/
+**/build/
+android/app/build/
+Antigravity WebView App/android/app/build/
+Antigravity Native App/app/build/
+Antigravity Native App/build/
+Antigravity WebView App/android/build/
+Antigravity WebView App/android/.gradle/
+Antigravity Native App/.gradle/
