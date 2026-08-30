@@ -205,23 +205,6 @@ export const SetupHub: React.FC<SetupHubProps> = ({
           </button>
         </div>
       </div>
-
-      {/* FIXED BOTTOM ADMOB SPONSOR BANNER CONTAINER (Always visible at the bottom of the screen) */}
-      <div className="w-full bg-[#0c0e15] border-t border-surface-border px-3 py-2 flex flex-col items-center justify-center flex-shrink-0 z-50">
-        <div className="w-full max-w-sm h-12 rounded-xl bg-surface-card/60 border border-dashed border-gray-800 flex items-center justify-between px-3">
-          <div className="flex items-center gap-2">
-            <span className="text-[9px] font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-950/80 px-1.5 py-0.5 rounded border border-indigo-500/30">
-              Ad
-            </span>
-            <span className="text-[11px] text-gray-400 font-medium">
-              Google AdMob Sponsor
-            </span>
-          </div>
-          <span className="text-[10px] text-gray-600 font-mono">
-            Active
-          </span>
-        </div>
-      </div>
     </div>
   );
 };
