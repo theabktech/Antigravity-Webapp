@@ -21,13 +21,14 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.activity.OnBackPressedCallback;
 import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.BridgeWebChromeClient;
@@ -38,6 +39,8 @@ public class MainActivity extends BridgeActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        // Modern Android 15 & 16 Edge-to-Edge initialization
+        EdgeToEdge.enable(this);
         super.onCreate(savedInstanceState);
 
         // Predictive back gesture support for AndroidX & WebView history navigation
@@ -54,12 +57,9 @@ public class MainActivity extends BridgeActivity {
             }
         });
 
-        // Status bar styling: Solid dark background with clean insets & light icons
+        // Configure system bar icons (light icons on dark background)
         Window window = getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        window.setStatusBarColor(Color.parseColor("#090b10"));
-        window.setNavigationBarColor(Color.parseColor("#090b10"));
+        WindowCompat.setDecorFitsSystemWindows(window, false);
 
         WindowInsetsControllerCompat insetsController = WindowCompat.getInsetsController(window, window.getDecorView());
         if (insetsController != null) {
@@ -67,12 +67,15 @@ public class MainActivity extends BridgeActivity {
             insetsController.setAppearanceLightNavigationBars(false);
         }
 
-        // Apply physical top status bar inset padding so the app NEVER overlaps with the status bar/notch
+        // Apply physical system bar and display cutout (notch) insets padding dynamically
         View decorView = window.getDecorView();
-        ViewCompat.setOnApplyWindowInsetsListener(decorView, (v, insets) -> {
-            Insets statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars());
-            v.setPadding(0, statusBarInsets.top, 0, 0);
-            return insets;
+        ViewCompat.setOnApplyWindowInsetsListener(decorView, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(
+                WindowInsetsCompat.Type.statusBars() | 
+                WindowInsetsCompat.Type.displayCutout()
+            );
+            v.setPadding(insets.left, insets.top, insets.right, 0);
+            return windowInsets;
         });
 
         // Initialize Android Notification Channel & Request Permission on Android 13+
